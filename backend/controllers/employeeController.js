@@ -24,7 +24,8 @@ const createEmployee = async (req, res) => {
     let { name, email, password, role, department, designation } = req.body;
     
     // Admin restriction logic
-    if (email === 'vijaym0508@gmail.com') {
+    const normalizedEmail = (email || '').toLowerCase().trim();
+    if (normalizedEmail === 'vijaym0508@gmail.com') {
       role = 'Admin';
     } else if (role === 'Admin') {
       return res.status(403).json({ message: 'Not authorized to create an Admin.' });
@@ -47,9 +48,12 @@ const updateEmployee = async (req, res) => {
       let newEmail = req.body.email || user.email;
       let newRole = req.body.role || user.role;
       
-      if (newEmail === 'vijaym0508@gmail.com') {
+      const normalizedNewEmail = (newEmail || '').toLowerCase().trim();
+      const normalizedCurrentEmail = (user.email || '').toLowerCase().trim();
+
+      if (normalizedNewEmail === 'vijaym0508@gmail.com') {
         newRole = 'Admin';
-      } else if (newRole === 'Admin' && user.email !== 'vijaym0508@gmail.com') {
+      } else if (newRole === 'Admin' && normalizedCurrentEmail !== 'vijaym0508@gmail.com') {
         // Prevent upgrading a non-admin to admin
         return res.status(403).json({ message: 'Not authorized to assign Admin role.' });
       }

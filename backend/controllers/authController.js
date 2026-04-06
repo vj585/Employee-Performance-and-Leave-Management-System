@@ -31,7 +31,8 @@ const registerUser = async (req, res) => {
   let { name, email, password, role, department, designation } = req.body;
 
   // Force specific email to be Admin, and prevent others from choosing Admin
-  if (email === 'vijaym0508@gmail.com') {
+  const normalizedEmail = (email || '').toLowerCase().trim();
+  if (normalizedEmail === 'vijaym0508@gmail.com') {
     role = 'Admin';
   } else if (role === 'Admin') {
     return res.status(403).json({ message: 'Not authorized to register as Admin.' });
