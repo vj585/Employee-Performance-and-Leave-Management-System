@@ -21,7 +21,15 @@ const getEmployeeById = async (req, res) => {
 
 const createEmployee = async (req, res) => {
   try {
-    const { name, email, password, role, department, designation } = req.body;
+    let { name, email, password, role, department, designation } = req.body;
+    
+    // Admin restriction logic
+    if (email === 'vijaym0508@gmail.com') {
+      role = 'Admin';
+    } else if (role === 'Admin') {
+      return res.status(403).json({ message: 'Not authorized to create an Admin.' });
+    }
+
     const userExists = await User.findOne({ email });
     if (userExists) return res.status(400).json({ message: 'User already exists' });
     
@@ -36,9 +44,19 @@ const updateEmployee = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     if (user) {
+      let newEmail = req.body.email || user.email;
+      let newRole = req.body.role || user.role;
+      
+      if (newEmail === 'vijaym0508@gmail.com') {
+        newRole = 'Admin';
+      } else if (newRole === 'Admin' && user.email !== 'vijaym0508@gmail.com') {
+        // Prevent upgrading a non-admin to admin
+        return res.status(403).json({ message: 'Not authorized to assign Admin role.' });
+      }
+
       user.name = req.body.name || user.name;
-      user.email = req.body.email || user.email;
-      user.role = req.body.role || user.role;
+      user.email = newEmail;
+      user.role = newRole;
       user.department = req.body.department || user.department;
       user.designation = req.body.designation || user.designation;
       if (req.body.leaveBalance) user.leaveBalance = req.body.leaveBalance;
